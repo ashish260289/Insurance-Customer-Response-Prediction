@@ -75,3 +75,4 @@ print(classification_report_str)
 
 # Save the trained model to a file
 dump(model, 'logistic_regression_model.joblib')
+dump(preprocessor, 'preprocessor.joblib')

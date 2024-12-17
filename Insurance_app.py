@@ -2,10 +2,11 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from joblib import load
-from sklearn.preprocessing import LabelEncoder
 
 # Load the trained Logistic Regression model
 model = load('logistic_regression_model.joblib')
+# Assuming you saved the preprocessor as well
+preprocessor = load('preprocessor.joblib')
 
 # Create a Streamlit app
 st.title("Insurance Customer Response Prediction")
@@ -28,6 +29,7 @@ vehicle_age_map = {"< 1 Year": 0, "1-2 Year": 1, "> 2 Years": 2}
 vehicle_damage_map = {"No": 0, "Yes": 1}
 gender_map = {"Male": 1, "Female": 0}
 
+# Prepare input features
 input_features = np.array([
     gender_map[gender],
     age,
@@ -41,11 +43,26 @@ input_features = np.array([
     vintage
 ]).reshape(1, -1)
 
+# Column names as used during training
+input_columns = [
+    'Gender', 'Age', 'Driving_License', 'Region_Code', 'Previously_Insured', 
+    'Vehicle_Age', 'Vehicle_Damage', 'Annual_Premium', 'Policy_Sales_Channel', 'Vintage'
+]
+
+# Convert input_features to a DataFrame with the correct column names
+input_df = pd.DataFrame(input_features, columns=input_columns)
+
+# Debugging step: Print the input dataframe to check the structure
+st.write("Input DataFrame for Prediction:")
+st.write(input_df)
+
+# Apply the preprocessor to transform the input features (ensure preprocessing consistency)
+input_features_processed = preprocessor.transform(input_df)
+
 # Prediction button
 if st.button("Predict"):
-    prediction = model.predict(input_features)
+    prediction = model.predict(input_features_processed)
     if prediction[0] == 1:
-        st.success("The customer is likely to respond positively!")
-    else:
         st.error("The customer is unlikely to respond.")
-
+    else:
+        st.success("The customer is likely to respond.")
